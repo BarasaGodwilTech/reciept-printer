@@ -1513,19 +1513,7 @@ function showToast(message, type = 'success') {
         controls.appendChild(syncBtn);
       }
       
-      // Add user info to header
-      const header = document.querySelector('.header');
-      if (header) {
-        const userInfo = document.createElement('div');
-        userInfo.style.cssText = 'margin-top: 10px; font-size: 14px;';
-        userInfo.innerHTML = `
-          <i class="fas fa-user"></i> ${user.name} 
-          <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">
-            Cloud Sync
-          </span>
-        `;
-        header.appendChild(userInfo);
-      }
+      // User info is already added by addUserInfo() function in DOMContentLoaded
     }
   });
 </script>
