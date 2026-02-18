@@ -369,7 +369,7 @@ body.modal-open {
         
         <div class="header">
             <h1><i class="fas fa-history"></i> Receipt History</h1>
-            <p>All receipts from <span id="receiptsStoreName">Will's Tech Store</span></p>
+            <p>All receipts from Will's Tech Store</p>
         </div>
         
         <div class="controls">
@@ -502,55 +502,27 @@ function addUserInfo() {
     }
 }
 
-// Single consolidated DOMContentLoaded listener
+// Call addUserInfo in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize store name from config
-    if (typeof STORE_CONFIG !== 'undefined') {
-        const receiptsStoreName = document.getElementById('receiptsStoreName');
-        if (receiptsStoreName) {
-            receiptsStoreName.textContent = STORE_CONFIG.storeName;
-        }
-    }
-    
-    // Initialize application
     loadReceipts();
     setupEventListeners();
     updateStats();
-    addUserInfo();
-    
-    // Add sync button for logged-in users
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    if (user && !user.isGuest) {
-        // Add sync button to controls
-        const controls = document.querySelector('.controls');
-        if (controls) {
-            const syncBtn = document.createElement('button');
-            syncBtn.className = 'btn btn-print';
-            syncBtn.id = 'syncCloud';
-            syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Cloud';
-            syncBtn.onclick = async function() {
-                await loadReceiptsFromFirebase(user.uid);
-                displayReceipts();
-                updateStats();
-            };
-            controls.appendChild(syncBtn);
-        }
-        
-        // Add user info to header
-        const header = document.querySelector('.header');
-        if (header) {
-            const userInfo = document.createElement('div');
-            userInfo.style.cssText = 'margin-top: 10px; font-size: 14px;';
-            userInfo.innerHTML = `
-                <i class="fas fa-user"></i> ${user.name} 
-                <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">
-                    Cloud Sync
-                </span>
-            `;
-            header.appendChild(userInfo);
-        }
-    }
+    addUserInfo(); // Add this line
 });
+        
+        
+        // Global variables
+        let allReceipts = [];
+        let currentPage = 1;
+        const receiptsPerPage = 12;
+        let filteredReceipts = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReceipts();
+            setupEventListeners();
+            updateStats();
+        });
         
         // Load receipts from localStorage
         function loadReceipts() {
@@ -1521,7 +1493,42 @@ function showToast(message, type = 'success') {
     }
   }
   
-  </script>
+  // Add sync button
+  document.addEventListener('DOMContentLoaded', function() {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (user && !user.isGuest) {
+      // Add sync button to controls
+      const controls = document.querySelector('.controls');
+      if (controls) {
+        const syncBtn = document.createElement('button');
+        syncBtn.className = 'btn btn-print';
+        syncBtn.id = 'syncCloud';
+        syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Cloud';
+        syncBtn.onclick = async function() {
+          await loadReceiptsFromFirebase(user.uid);
+          displayReceipts();
+          updateStats();
+        };
+        controls.appendChild(syncBtn);
+      }
+      
+      // Add user info to header
+      const header = document.querySelector('.header');
+      if (header) {
+        const userInfo = document.createElement('div');
+        userInfo.style.cssText = 'margin-top: 10px; font-size: 14px;';
+        userInfo.innerHTML = `
+          <i class="fas fa-user"></i> ${user.name} 
+          <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">
+            Cloud Sync
+          </span>
+        `;
+        header.appendChild(userInfo);
+      }
+    }
+  });
+</script>
 <div class="toast-container">
     <div id="toast" class="toast"></div>
 </div>
