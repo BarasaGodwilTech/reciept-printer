@@ -684,39 +684,247 @@
         
         /* Company Information Section Styling */
         .company-section {
-            background: #f8f9fa;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            transition: all 0.3s ease;
+        }
+        
+        .company-section:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
         
         .company-section h3 {
-            color: #374151;
-            margin-bottom: 15px;
+            color: #1f2937;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .company-section h3 i {
+            color: #3b82f6;
+            font-size: 20px;
         }
         
         .user-info-preview {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         
         .user-info-preview h4 {
-            margin: 0 0 10px 0;
-            color: #374151;
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-info-preview h4 i {
+            color: #10b981;
         }
         
         .user-info-preview p {
-            margin: 5px 0;
+            margin: 8px 0;
             color: #6b7280;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .user-info-preview strong {
             color: #111827;
+            font-weight: 600;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .company-section {
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }
+            
+            .company-section h3 {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+            
+            .user-info-preview {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .user-info-preview h4 {
+                font-size: 14px;
+            }
+            
+            .user-info-preview p {
+                font-size: 13px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .company-section {
+                padding: 15px;
+                margin: 15px 0;
+            }
+            
+            .company-section h3 {
+                font-size: 15px;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .user-info-preview {
+                padding: 12px;
+            }
+        }
+        
+        /* Form Group Improvements */
+        .company-section .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .company-section .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .company-section .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .company-section .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        .company-section .form-control:invalid {
+            border-color: #ef4444;
+        }
+        
+        .company-section .form-control:valid {
+            border-color: #10b981;
+        }
+        
+        /* Required field indicator */
+        .required-indicator {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        /* Modal improvements */
+        .modal-content {
+            max-width: 600px;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+        
+        /* Logged-in User Interface Styling */
+        .logged-in-container {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-profile-card {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-avatar {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Responsive for logged-in interface */
+        @media (max-width: 768px) {
+            .logged-in-container {
+                padding: 20px 10px;
+            }
+            
+            .user-profile-card {
+                padding: 20px;
+                margin: 0 10px;
+            }
+            
+            .user-avatar {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .user-avatar i {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .user-profile-card {
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                gap: 8px;
+            }
+            
+            .action-buttons button {
+                padding: 10px;
+                font-size: 14px;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -826,37 +1034,47 @@
                     
                     <!-- Company Information Section -->
                     <div class="company-section">
-                        <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">
-                            <i class="fas fa-store"></i> Company Information
-                        </h3>
+                        <h3><i class="fas fa-building"></i> Company Information</h3>
                         
                         <div class="form-group">
-                            <label class="form-label">Company Name *</label>
+                            <label class="form-label">
+                                <i class="fas fa-store"></i> Company Name <span class="required-indicator">*</span>
+                            </label>
                             <input type="text" id="companyName" class="form-control" placeholder="Your Business Name" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Company Phone *</label>
+                            <label class="form-label">
+                                <i class="fas fa-phone"></i> Company Phone <span class="required-indicator">*</span>
+                            </label>
                             <input type="tel" id="companyPhone" class="form-control" placeholder="+256 123 456 789" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Company Email</label>
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> Company Email
+                            </label>
                             <input type="email" id="companyEmail" class="form-control" placeholder="info@yourcompany.com">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Company Website</label>
-                            <input type="url" id="companyWebsite" class="form-control" placeholder="yourcompany.com">
+                            <label class="form-label">
+                                <i class="fas fa-globe"></i> Company Website
+                            </label>
+                            <input type="url" id="companyWebsite" class="form-control" placeholder="yourcompany.com" pattern="^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Company Address</label>
+                            <label class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Company Address
+                            </label>
                             <input type="text" id="companyAddress" class="form-control" placeholder="City, Country">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Currency</label>
+                            <label class="form-label">
+                                <i class="fas fa-money-bill-wave"></i> Currency
+                            </label>
                             <select id="companyCurrency" class="form-control">
                                 <option value="UGX">UGX - Ugandan Shilling</option>
                                 <option value="USD">USD - US Dollar</option>
@@ -938,32 +1156,44 @@
                     <h3>Company Information</h3>
                     
                     <div class="form-group">
-                        <label class="form-label">Company Name *</label>
+                        <label class="form-label">
+                            <i class="fas fa-store"></i> Company Name <span class="required-indicator">*</span>
+                        </label>
                         <input type="text" id="modalCompanyName" class="form-control" placeholder="Your Business Name" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Company Phone *</label>
+                        <label class="form-label">
+                            <i class="fas fa-phone"></i> Company Phone <span class="required-indicator">*</span>
+                        </label>
                         <input type="tel" id="modalCompanyPhone" class="form-control" placeholder="+256 123 456 789" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Company Email</label>
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i> Company Email
+                        </label>
                         <input type="email" id="modalCompanyEmail" class="form-control" placeholder="info@yourcompany.com">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Company Website</label>
-                        <input type="url" id="modalCompanyWebsite" class="form-control" placeholder="yourcompany.com">
+                        <label class="form-label">
+                            <i class="fas fa-globe"></i> Company Website
+                        </label>
+                        <input type="url" id="modalCompanyWebsite" class="form-control" placeholder="yourcompany.com" pattern="^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Company Address</label>
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Company Address
+                        </label>
                         <input type="text" id="modalCompanyAddress" class="form-control" placeholder="City, Country">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Currency</label>
+                        <label class="form-label">
+                            <i class="fas fa-money-bill-wave"></i> Currency
+                        </label>
                         <select id="modalCompanyCurrency" class="form-control">
                             <option value="UGX">UGX - Ugandan Shilling</option>
                             <option value="USD">USD - US Dollar</option>
@@ -1559,6 +1789,71 @@
             }
         }
         
+        // 7. LOGGED-IN USER INTERFACE
+        function showLoggedInUserInterface(user) {
+            // Hide the auth forms and tabs
+            document.querySelector('.auth-tabs').style.display = 'none';
+            document.querySelector('.auth-content').style.display = 'none';
+            
+            // Create logged-in user interface
+            const loggedInHTML = `
+                <div class="logged-in-container" style="text-align: center; padding: 40px 20px;">
+                    <div class="user-profile-card" style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 400px; margin: 0 auto;">
+                        <div class="user-avatar" style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #10b981); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                            <i class="fas fa-user" style="color: white; font-size: 32px;"></i>
+                        </div>
+                        <h3 style="margin: 0 0 10px 0; color: #1f2937;">Welcome back!</h3>
+                        <p style="margin: 0 0 8px 0; color: #374151; font-weight: 600;">${user.name}</p>
+                        <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">${user.email}</p>
+                        ${user.storeName ? `<p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;"><i class="fas fa-store"></i> ${user.storeName}</p>` : ''}
+                        
+                        <div class="action-buttons" style="display: flex; flex-direction: column; gap: 10px; margin-top: 25px;">
+                            <button id="continueToApp" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                                <i class="fas fa-arrow-right"></i> Continue to Application
+                            </button>
+                            <button id="logoutFromAuth" class="btn btn-secondary" style="width: 100%; padding: 12px; background: #ef4444; border: none;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert the logged-in interface
+            const authContainer = document.querySelector('.auth-container');
+            authContainer.innerHTML = loggedInHTML;
+            
+            // Add event listeners
+            document.getElementById('continueToApp').addEventListener('click', function() {
+                window.location.href = 'Recieptprinter.html';
+            });
+            
+            document.getElementById('logoutFromAuth').addEventListener('click', function() {
+                logoutUser();
+            });
+        }
+        
+        async function logoutUser() {
+            try {
+                // Sign out from Firebase
+                await auth.signOut();
+                
+                // Clear local storage
+                localStorage.removeItem('currentUser');
+                
+                showToast('Logged out successfully', 'success');
+                
+                // Reload the page to show the login interface
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('Error logging out', 'error');
+            }
+        }
+        
         // =============================================
         // EVENT LISTENERS & INITIALIZATION
         // =============================================
@@ -1575,9 +1870,9 @@
                     console.log('Parsed user data:', user);
                     
                     if (!user.isGuest) {
-                        console.log('User found, redirecting to main page...');
-                        // Force immediate redirect
-                        window.location.replace('Recieptprinter.html');
+                        console.log('Logged-in user found, showing logout option...');
+                        // Show logged-in user interface
+                        showLoggedInUserInterface(user);
                         return; // Stop execution
                     }
                 } catch (e) {
