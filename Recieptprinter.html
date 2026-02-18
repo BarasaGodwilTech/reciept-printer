@@ -677,7 +677,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-store"></i> <span id="headerStoreName"></span>Will's Tech Store</span></h1>
+            <h1><i class="fas fa-store"></i> <span id="headerStoreName">Will's Tech Store</span></h1>
             <p>Receipt Printing System - <span id="headerStoreWebsite">willstech.store</span></p>
         </div>
         <!-- Add this right after the header div -->
@@ -723,11 +723,11 @@
             <h2 class="card-title"><i class="fas fa-store-alt"></i> Store Info</h2>
             <div class="form-group">
                 <label class="form-label">Store Name</label>
-                <input type="text" id="storeName" class="form-control" value="Will's Tech Store">
+                <input type="text" id="storeName" class="form-control" value="">
             </div>
             <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="text" id="storePhone" class="form-control" value="+256 751 924 844">
+                <input type="text" id="storePhone" class="form-control" value="">
             </div>
             <br> <br> <br> <br> <br> <br> <br> <br>
 
@@ -1471,22 +1471,26 @@ async function loadUserReceipts() {
                     headerStoreWebsite.textContent = STORE_CONFIG.storeWebsite;
                 }
                 
-                // Update form fields
+                // Update form fields (set values regardless of current value)
                 const storeNameInput = document.getElementById('storeName');
                 const storePhoneInput = document.getElementById('storePhone');
                 const deliveryFeeInput = document.getElementById('deliveryFee');
                 
-                if (storeNameInput && storeNameInput.value === 'Will\'s Tech Store') {
+                if (storeNameInput) {
                     storeNameInput.value = STORE_CONFIG.storeName;
                 }
-                if (storePhoneInput && storePhoneInput.value === '+256 751 924 844') {
+                if (storePhoneInput) {
                     storePhoneInput.value = STORE_CONFIG.storePhone;
                 }
-                if (deliveryFeeInput && deliveryFeeInput.value === '5000') {
+                if (deliveryFeeInput) {
                     deliveryFeeInput.value = STORE_CONFIG.receipt.deliveryFee;
                 }
                 
-                console.log('Store values initialized from config');
+                console.log('Store values initialized from config:', {
+                    name: STORE_CONFIG.storeName,
+                    phone: STORE_CONFIG.storePhone,
+                    website: STORE_CONFIG.storeWebsite
+                });
             } else {
                 console.warn('STORE_CONFIG not available, using default values');
             }
