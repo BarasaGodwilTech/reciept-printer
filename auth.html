@@ -688,7 +688,7 @@
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <h1><i class="fas fa-store"></i> <span id="headerStoreName">Will's Tech Store</span></h1>
+            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
             <p>Receipt Management System</p>
         </div>
         
@@ -1327,17 +1327,6 @@
         // =============================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Auth page loaded');
-            
-            // Initialize store values from config
-            if (typeof STORE_CONFIG !== 'undefined') {
-                const headerStoreName = document.getElementById('headerStoreName');
-                if (headerStoreName) {
-                    headerStoreName.textContent = STORE_CONFIG.storeName;
-                }
-                console.log('Store name initialized from config:', STORE_CONFIG.storeName);
-            } else {
-                console.warn('STORE_CONFIG not available, using default values');
-            }
             
             // Check if user is already logged in
             const currentUser = localStorage.getItem('currentUser');
