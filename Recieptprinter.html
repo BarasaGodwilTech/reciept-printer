@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will's Tech Store - Receipt Printer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            color: #2563eb;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .printer-status {
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-connected {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        
+        .status-disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+        
+        /* Receipt Preview - Optimized for 58mm */
+        .receipt-paper {
+            width: 100%;
+            max-width: 200px;
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 15px 10px;
+            margin: 0 auto;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 9px;
+            line-height: 1.1;
+            position: relative;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .printer-option {
+            padding: 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .printer-option.selected {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+        .product-result-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-result-item:hover {
+    background: #f0f9ff;
+}
+
+.product-result-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.product-price {
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.product-sku {
+    font-size: 12px;
+    color: #666;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+/* Product Search Container */
+.product-search-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.product-search-wrapper {
+    position: relative;
+}
+
+.product-search-input {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.product-search-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.product-search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+}
+
+/* Product Results Dropdown */
+.product-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+    display: none;
+}
+
+.product-result-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.product-result-item:hover {
+    background-color: #f0f9ff;
+}
+
+.product-result-item:last-child {
+    border-bottom: none;
+}
+
+.product-result-item.selected {
+    background-color: #dbeafe;
+    border-left: 3px solid #2563eb;
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.product-name-price {
+    flex: 1;
+    min-width: 0; /* Prevents overflow */
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-category {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.product-price-sku {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.product-price {
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.product-sku {
+    font-size: 11px;
+    color: #9ca3af;
+    background: #f9fafb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.product-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Keyboard navigation hint */
+.product-search-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 5px;
+    padding: 5px 0;
+    border-top: 1px solid #f3f4f6;
+    text-align: center;
+}
+
+/* Loading state */
+.product-results.loading {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.product-results.loading::after {
+    content: "Loading...";
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        display: block; /* Change from grid to block on mobile */
+    }
+    
+    .product-search-input {
+        font-size: 16px;
+        padding: 14px 45px 14px 15px;
+    }
+    
+    .product-results {
+        max-height: 250px;
+        border-radius: 6px;
+        position: fixed !important; /* Force fixed positioning */
+        left: 20px !important;
+        right: 20px !important;
+        top: auto !important;
+        bottom: 10px !important;
+        max-height: 60vh;
+        z-index: 2000;
+        width: auto !important; /* Remove fixed width */
+    }
+    
+    .product-result-item {
+        padding: 12px 15px;
+    }
+    
+    .product-name {
+        font-size: 14px;
+    }
+    
+    .product-price {
+        font-size: 14px;
+    }
+    
+    /* Fix for mobile grid layout */
+    .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .btn-group {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-info {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .product-price-sku {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .product-results {
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 5px !important;
+        max-height: 50vh;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Add shadow at top for mobile */
+    }
+    
+    /* Ensure results appear above keyboard on focus */
+    .product-search-input:focus + .product-results {
+        bottom: 50vh !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .product-result-item {
+        padding: 14px 15px;
+        min-height: 44px; /* Apple's recommended touch target size */
+    }
+    
+    .product-result-item:active {
+        background-color: #dbeafe;
+        transform: scale(0.98); /* Add touch feedback */
+        transition: transform 0.1s;
+    }
+}
+
+/* Prevent zoom on mobile input focus */
+@media (max-width: 768px) {
+    .product-search-input {
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+    
+    select,
+    input[type="text"],
+    input[type="number"] {
+        font-size: 16px !important; /* Prevent zoom on all inputs */
+    }
+}
+
+/* Mobile-specific fixes for dropdown positioning */
+@media (max-width: 768px) {
+    .product-search-container {
+        position: static; /* Change from relative to static */
+    }
+    
+    .product-search-wrapper {
+        position: relative;
+    }
+    
+    /* Force the dropdown to be visible and properly positioned */
+    .product-results:not([style*="display: none"]) {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+    }
+}
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 5px;
+            display: none;
+            z-index: 1001;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .header {
+                grid-column: 1 / -1;
+            }
+            
+            .btn {
+                width: auto;
+                margin-right: 10px;
+            }
+            
+            .btn-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+
+        /* Add to existing CSS */
+.user-menu {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#userDropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 250px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+#userDropdown.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    color: #374151;
+}
+
+.user-dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.user-dropdown-item i {
+    width: 20px;
+    color: #6b7280;
+}
+
+.user-dropdown-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 5px 0;
+}
+
+/* Profile modal */
+#profileModal .modal-content {
+    max-width: 500px;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.profile-stat-card {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2563eb;
+    margin-bottom: 5px;
+}
+
+.profile-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.account-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.badge-guest {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-premium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-free {
+    background: #d1fae5;
+    color: #065f46;
+}
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase configuration (use what you have)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
+    authDomain: "willstechstore-reciept.firebaseapp.com",
+    projectId: "willstechstore-reciept",
+    storageBucket: "willstechstore-reciept.firebasestorage.app",
+    messagingSenderId: "218930027222",
+    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
+    measurementId: "G-0K2H44N77D"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  
+  // Get services
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  // analytics is optional for receipts
+  
+  // Now you can use:
+  // auth.signInWithEmailAndPassword()
+  // db.collection().add()
+  // etc.
+</script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
+            <p>Receipt Printing System - willstech.store</p>
+        </div>
+        <!-- Add this right after the header div -->
+<div class="user-menu" style="position: absolute; top: 20px; right: 20px;">
+    <button id="userMenuBtn" class="btn" style="background: white; color: #2563eb; padding: 8px 15px; border-radius: 20px;">
+        <i class="fas fa-user"></i> <span id="userName">Guest</span>
+    </button>
+    <div id="userDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 200px; z-index: 1000;">
+        <div style="padding: 15px; border-bottom: 1px solid #e5e7eb;">
+            <div id="userEmail" style="font-size: 12px; color: #6b7280;"></div>
+        </div>
+        <button id="viewProfile" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-user-circle"></i> Profile
+        </button>
+        <button id="syncReceipts" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-sync"></i> Sync Receipts
+        </button>
+        <button id="backupData" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-cloud-upload-alt"></i> Backup to Cloud
+        </button>
+        <div style="border-top: 1px solid #e5e7eb;">
+            <button id="logoutBtn" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #ef4444;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add this modal for user profile -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-user-circle"></i> User Profile</h3>
+            <button class="close-profile-modal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div id="profileContent">
+            <!-- Profile content will be loaded here -->
+        </div>
+    </div>
+</div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-store-alt"></i> Store Info</h2>
+            <div class="form-group">
+                <label class="form-label">Store Name</label>
+                <input type="text" id="storeName" class="form-control" value="Will's Tech Store">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="text" id="storePhone" class="form-control" value="+256 751 924 844">
+            </div>
+            <br> <br> <br> <br> <br> <br> <br> <br>
+
+               <a href="receipts.html" class="btn btn-primary" style="text-decoration: none;">
+               <i class="fas fa-history"></i>  Receipt History </a>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-receipt"></i> Receipt Details</h2>
+            <div class="form-group">
+                <label class="form-label">Customer Name</label>
+                <input type="text" id="customerName" class="form-control" placeholder="Enter customer name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Payment Method</label>
+                <select id="paymentMethod" class="form-control">
+                    <option value="Cash">Cash</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Card">Card</option>
+                </select>
+            </div>
+            <div class="form-group">
+                 <label class="form-label">Delivery Fee</label>
+                   <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="number" id="deliveryFee" class="form-control" value="5000" step="1000" style="flex: 1;">
+        <label style="white-space: nowrap;">
+            <input type="checkbox" id="freeDelivery"> Free Delivery
+        </label>
+              </div>
+        </div>
+            
+            <div id="printerStatus" class="printer-status status-disconnected">
+                <i class="fas fa-print"></i>
+                <span>Printer: Not Connected</span>
+            </div>
+            
+            <div class="btn-group">
+                <button id="selectPrinter" class="btn btn-primary">
+                    <i class="fas fa-bluetooth"></i> Select Printer
+                </button>
+                <button id="testPrint" class="btn btn-success" disabled>
+                    <i class="fas fa-print"></i> Test Print
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Items (UGX)</h2>
+
+    <!-- Improved Search Section -->
+    <div class="product-search-container">
+        <div class="form-group">
+            <label class="form-label">Search & Add Products</label>
+            <div class="product-search-wrapper">
+                <input type="text" id="productSearch" class="form-control product-search-input" 
+                       placeholder="Type product name, SKU, or category..." 
+                       autocomplete="off">
+                <i class="fas fa-search product-search-icon"></i>
+            </div>
+            <div id="productResults" class="product-results"></div>
+            
+            <!-- Loading indicator (optional) -->
+            <div id="searchLoading" style="display: none; text-align: center; padding: 10px;">
+                <i class="fas fa-spinner fa-spin"></i> Loading products...
+            </div>
+        </div>
+    </div>
+    <!-- END OF IMPROVED SEARCH SECTION -->
+    
+    <div id="itemsContainer"></div>
+    <button id="addItem" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Item
+    </button>
+</div>
+
+            
+        
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-cogs"></i> Actions</h2>
+            <div class="btn-group">
+                <button id="printReceipt" class="btn btn-success">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <button id="previewReceipt" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button id="clearAll" class="btn btn-danger">
+                    <i class="fas fa-redo"></i> Clear
+                </button>
+            </div>
+        </div>
+        
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2 class="card-title"><i class="fas fa-eye"></i> Receipt Preview</h2>
+            <div id="receiptPreview" class="receipt-paper"></div>
+        </div>
+    </div>
+    
+    <!-- Printer Modal -->
+    <div id="printerModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Select Printer Method</h3>
+                <button id="closeModal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="printer-option" data-method="usb-network">
+                <i class="fas fa-print"></i>
+                <strong>System Printer</strong>
+                <p>Print using your system printer</p>
+            </div>
+            
+            <div id="bluetoothOption" class="printer-option" data-method="web-bluetooth">
+                <i class="fas fa-bluetooth"></i>
+                <strong>Bluetooth Printer</strong>
+                <p>Connect to Bluetooth thermal printer</p>
+            </div>
+            
+            <button id="confirmMethod" class="btn btn-success" style="margin-top: 20px;">
+                <i class="fas fa-check"></i> Use Selected Method
+            </button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Add to the beginning of your JavaScript
+
+
+// Check if user is logged in
+// Check if user is logged in
+function checkUserSession() {
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (!currentUser) {
+        window.location.href = 'auth.html';
+        return null;
+    }
+    
+    return JSON.parse(currentUser); // Just return the user
+}
+// Get current user
+function getCurrentUser() {
+    return checkUserSession();
+}
+
+// Update user menu
+function updateUserMenu() {
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    
+    if (userName) {
+        userName.textContent = user.isGuest ? 'Guest' : user.name.split(' ')[0];
+    }
+    
+    if (userEmail) {
+        userEmail.textContent = user.isGuest ? 'Guest Mode' : user.email;
+    }
+    
+    // Show backup option only for logged in users
+    const backupBtn = document.getElementById('backupData');
+    if (backupBtn) {
+        backupBtn.style.display = user.isGuest ? 'none' : 'block';
+    }
+}
+
+// Sync receipts to cloud (for logged in users)
+async function syncReceiptsToCloud() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Please create an account to sync receipts', 'error');
+        return;
+    }
+    
+    showToast('Syncing receipts to Firebase...', 'success');
+    
+    try {
+        // Get local receipts
+        const localReceipts = localStorage.getItem('willstech_receipts');
+        
+        if (localReceipts) {
+            const receipts = JSON.parse(localReceipts);
+            let syncedCount = 0;
+            
+            // Upload each receipt to Firebase
+            for (const receipt of receipts) {
+                // Check if receipt already exists in Firebase
+                const receiptDoc = await db.collection('users')
+                    .doc(user.uid)
+                    .collection('receipts')
+                    .doc(receipt.id)
+                    .get();
+                
+                if (!receiptDoc.exists) {
+                    await db.collection('users')
+                        .doc(user.uid)
+                        .collection('receipts')
+                        .doc(receipt.id)
+                        .set({
+                            ...receipt,
+                            userId: user.uid,
+                            syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    syncedCount++;
+                }
+            }
+            
+            // Also sync any backup receipts
+            await syncBackupReceiptsToFirebase();
+            
+            showToast(`Synced ${syncedCount} receipts to cloud`, 'success');
+        }
+        
+    } catch (error) {
+        console.error('Cloud sync error:', error);
+        showToast('Cloud sync failed. Check connection.', 'error');
+    }
+}
+// Backup data (export to file)
+async function backupData() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Create an account to enable cloud backup', 'error');
+        return;
+    }
+    
+    try {
+        showToast('Creating backup from Firebase...', 'success');
+        
+        // Get receipts from Firebase
+        const receiptsSnapshot = await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .get();
+        
+        const cloudReceipts = receiptsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamps to ISO strings
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate().toISOString();
+            }
+            if (data.syncedAt && data.syncedAt.toDate) {
+                data.syncedAt = data.syncedAt.toDate().toISOString();
+            }
+            return data;
+        });
+        
+        // Get user info from Firebase
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+        
+        // Create backup file
+        const backup = {
+            version: '2.0',
+            backupDate: new Date().toISOString(),
+            user: {
+                uid: user.uid,
+                name: userData?.name || user.name,
+                email: userData?.email || user.email,
+                createdAt: userData?.createdAt?.toDate?.()?.toISOString() || user.createdAt
+            },
+            receipts: cloudReceipts,
+            settings: {
+                storeName: document.getElementById('storeName').value,
+                storePhone: document.getElementById('storePhone').value
+            },
+            exportDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(backup, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileName = `willstech_firebase_backup_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileName);
+        linkElement.click();
+        
+        showToast('Backup file downloaded from Firebase!', 'success');
+        
+    } catch (error) {
+        console.error('Backup error:', error);
+        showToast('Failed to create backup from Firebase', 'error');
+    }
+}
+// Restore data from backup
+function restoreData(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            // Validate backup format
+            if (!backup.user || !backup.receipts) {
+                showToast('Invalid backup file format', 'error');
+                return;
+            }
+            
+            // Restore receipts
+            const user = getCurrentUser();
+            if (!user.isGuest) {
+                // Update user's receipts in storage
+                const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+                const users = storedUsers ? JSON.parse(storedUsers) : [];
+                const userIndex = users.findIndex(u => u.id === user.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].receipts = backup.receipts;
+                    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+                }
+            }
+            
+            // Restore local receipts
+            localStorage.setItem('willstech_receipts', JSON.stringify(backup.receipts));
+            
+            // Restore settings if available
+            if (backup.settings) {
+                if (backup.settings.storeName) {
+                    localStorage.setItem('storeName', backup.settings.storeName);
+                }
+                if (backup.settings.storePhone) {
+                    localStorage.setItem('storePhone', backup.settings.storePhone);
+                }
+            }
+            
+            showToast(`Restored ${backup.receipts.length} receipts from backup`, 'success');
+            location.reload();
+            
+        } catch (error) {
+            showToast('Error reading backup file', 'error');
+            console.error(error);
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+// Show user profile
+async function showUserProfile() {
+    const user = getCurrentUser();
+    const modal = document.getElementById('profileModal');
+    const content = document.getElementById('profileContent');
+    
+    // Get user stats
+    // Get user stats from Firebase
+    let receiptCount = 0;
+    let totalRevenue = 0;
+    let todayReceipts = 0;
+    
+    if (!user.isGuest) {
+        try {
+            const receiptsSnapshot = await db.collection('users')
+                .doc(user.uid)
+                .collection('receipts')
+                .get();
+            
+            const receipts = receiptsSnapshot.docs.map(doc => doc.data());
+            receiptCount = receipts.length;
+            totalRevenue = receipts.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+            
+            const today = new Date().toDateString();
+            todayReceipts = receipts.filter(r => {
+                const receiptDate = r.timestamp?.toDate ? 
+                    r.timestamp.toDate().toDateString() : 
+                    new Date(r.timestamp).toDateString();
+                return receiptDate === today;
+            }).length;
+            
+        } catch (error) {
+            console.error('Error loading user stats:', error);
+        }
+    }
+    
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 80px; height: 80px; background: #2563eb; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                <i class="fas fa-user" style="font-size: 36px; color: white;"></i>
+            </div>
+            <h3>${user.name || 'Guest User'}</h3>
+            <div style="color: #6b7280; margin-bottom: 5px;">${user.email || 'No email (Guest Mode)'}</div>
+            <span class="account-type-badge ${user.isGuest ? 'badge-guest' : 'badge-free'}">
+                ${user.isGuest ? 'Guest Account' : 'Free Account'}
+            </span>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">${receiptCount}</div>
+                <div class="profile-stat-label">Total Receipts</div>
+            </div>
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">${todayReceipts}</div>
+                <div class="profile-stat-label">Today's Receipts</div>
+            </div>
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">UGX ${totalRevenue.toLocaleString()}</div>
+                <div class="profile-stat-label">Total Revenue</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 10px;">Account Actions</h4>
+            <div style="display: grid; gap: 10px;">
+                <button onclick="syncReceiptsToCloud()" class="btn btn-primary">
+                    <i class="fas fa-sync"></i> Sync Receipts to Cloud
+                </button>
+                <button onclick="backupData()" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Backup
+                </button>
+                <label class="btn btn-secondary" style="text-align: center; cursor: pointer;">
+                    <i class="fas fa-upload"></i> Restore from Backup
+                    <input type="file" accept=".json" style="display: none;" 
+                           onchange="restoreData(this.files[0])">
+                </label>
+            </div>
+        </div>
+        
+        ${!user.isGuest ? `
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h4 style="margin-bottom: 10px;">Account Settings</h4>
+            <div style="display: grid; gap: 10px;">
+                <button onclick="changePassword()" class="btn" style="background: #f3f4f6; color: #374151;">
+                    <i class="fas fa-key"></i> Change Password
+                </button>
+                <button onclick="exportAllData()" class="btn" style="background: #f3f4f6; color: #374151;">
+                    <i class="fas fa-file-export"></i> Export All Data
+                </button>
+            </div>
+        </div>
+        ` : ''}
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
+            <div><strong>Account Created:</strong> ${new Date(user.createdAt).toLocaleDateString()}</div>
+            <div><strong>Storage Used:</strong> ${receiptCount * 0.5} KB (approx)</div>
+            <div><strong>Sync Status:</strong> ${user.isGuest ? 'Local only' : 'Cloud enabled'}</div>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+// Logout user
+
+function logoutUser() {
+    if (confirm('Are you sure you want to logout?')) {
+        const user = getCurrentUser();
+        if (user && !user.isGuest) {
+            firebaseLogout();
+        } else {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'auth.html';
+        }
+    }
+}
+
+async function firebaseLogout() {
+    try {
+        await auth.signOut();
+        localStorage.removeItem('currentUser');
+        showToast('Logged out successfully', 'success');
+        setTimeout(() => {
+            window.location.href = 'auth.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Logout failed: ' + error.message, 'error');
+    }
+}
+
+// Change password
+function changePassword() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Guest users cannot change password', 'error');
+        return;
+    }
+    
+    const oldPassword = prompt('Enter your current password:');
+    if (!oldPassword) return;
+    
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userIndex = users.findIndex(u => u.id === user.id);
+    
+    if (userIndex === -1) {
+        showToast('User not found', 'error');
+        return;
+    }
+    
+    if (users[userIndex].password !== btoa(oldPassword)) {
+        showToast('Incorrect current password', 'error');
+        return;
+    }
+    
+    const newPassword = prompt('Enter new password (min 8 characters):');
+    if (!newPassword || newPassword.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+    }
+    
+    const confirmPassword = prompt('Confirm new password:');
+    if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+    
+    users[userIndex].password = btoa(newPassword);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    
+    showToast('Password changed successfully!', 'success');
+}
+
+// Export all user data
+function exportAllData() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Create an account to export data', 'error');
+        return;
+    }
+    
+    // Get all user data
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userData = users.find(u => u.id === user.id);
+    
+    if (!userData) {
+        showToast('User data not found', 'error');
+        return;
+    }
+    
+    // Create comprehensive export
+    const exportData = {
+        version: '2.0',
+        exportDate: new Date().toISOString(),
+        user: {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            createdAt: userData.createdAt
+        },
+        receipts: userData.receipts || [],
+        preferences: {
+            storeName: document.getElementById('storeName').value,
+            storePhone: document.getElementById('storePhone').value
+        },
+        products: allProducts || []
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileName = `willstech_export_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    showToast('All data exported successfully!', 'success');
+}
+
+// Add user menu event listeners
+function setupUserMenu() {
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const viewProfileBtn = document.getElementById('viewProfile');
+    const syncBtn = document.getElementById('syncReceipts');
+    const backupBtn = document.getElementById('backupData');
+    const closeProfileModal = document.querySelector('.close-profile-modal');
+    const profileModal = document.getElementById('profileModal');
+    
+    if (userMenuBtn) {
+        userMenuBtn.addEventListener('click', function() {
+            userDropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logoutUser);
+    }
+    
+    if (viewProfileBtn) {
+        viewProfileBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            showUserProfile();
+        });
+    }
+    
+    if (syncBtn) {
+        syncBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            syncReceiptsToCloud();
+        });
+    }
+    
+    if (backupBtn) {
+        backupBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            backupData();
+        });
+    }
+    
+    if (closeProfileModal) {
+        closeProfileModal.addEventListener('click', function() {
+            profileModal.style.display = 'none';
+        });
+    }
+    
+    if (profileModal) {
+        profileModal.addEventListener('click', function(event) {
+            if (event.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+        });
+    }
+}
+
+// Initialize everything when DOM loads
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check user session
+    const user = checkUserSession();
+    
+    if (user) {
+        // Update user menu
+        updateUserMenu();
+        // Setup user menu events
+        setupUserMenu();
+        
+        // Load user receipts if logged in
+        if (!user.isGuest) {
+            loadUserReceipts();
+        }
+    }
+    
+    // Initialize receipt system
+    initializeReceipt();
+    setupEventListeners();
+    loadProducts();
+});
+
+// Load user receipts into local storage
+async function loadUserReceipts() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) return;
+    
+    try {
+        showToast('Loading receipts from Firebase...', 'success');
+        
+        // Load receipts from Firebase
+        const receiptsSnapshot = await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        const cloudReceipts = receiptsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Convert Firestore Timestamp to ISO string
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate().toISOString();
+            }
+            return data;
+        });
+        
+        // Merge with local receipts
+        const localReceipts = localStorage.getItem('willstech_receipts');
+        const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
+        
+        // Create map (cloud receipts take priority)
+        const receiptMap = new Map();
+        
+        // Add cloud receipts first
+        cloudReceipts.forEach(receipt => {
+            receiptMap.set(receipt.id, receipt);
+        });
+        
+        // Add local receipts if not in cloud
+        localReceiptsArray.forEach(receipt => {
+            if (!receiptMap.has(receipt.id)) {
+                receiptMap.set(receipt.id, receipt);
+            }
+        });
+        
+        // Save merged list
+        const mergedReceipts = Array.from(receiptMap.values());
+        localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
+        
+        console.log(`Loaded ${cloudReceipts.length} receipts from Firebase`);
+        showToast(`Loaded ${cloudReceipts.length} receipts from cloud`, 'success');
+        
+    } catch (error) {
+        console.error('Error loading receipts from Firebase:', error);
+        showToast('Using local cache, cloud sync failed', 'error');
+    }
+}
+
+// Toast function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generate receipt number
+        function generateReceiptNumber() {
+    const now = new Date();
+    const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const timePart = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+    const random = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+    
+    return `WTS-${datePart}-${timePart}${milliseconds}${random}`;
+}
+// Example: WTS-20241212-14304512345
+        
+        // Generate transaction ID
+        function generateTransactionId() {
+            const now = new Date();
+            const timestamp = now.getTime().toString().slice(-8);
+            const random = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+            return `TXN${timestamp}${random}`;
+        }
+        
+        // Format currency
+        function formatUGX(amount) {
+    return 'UGX ' + amount.toLocaleString('en-US');
+}
+        
+        // Global variables
+        let selectedPrinterMethod = null;
+        let bluetoothDevice = null;
+        let receiptItems = [];
+        
+
+        // Add this near other global variables
+let allProducts = [];
+
+// Load products from data/site-config.js
+// Load products from site-config.json
+async function loadProducts() {
+    try {
+        const response = await fetch('../data/site-config.json');
+        if (!response.ok) {
+            // Try with .json extension
+            const response2 = await fetch('../data/site-config.json');
+            if (!response2.ok) throw new Error('Products file not found');
+            const text = await response2.text();
+            allProducts = JSON.parse(text).products || [];
+        } else {
+            const text = await response.text();
+            // Try to parse as JSON, might be JavaScript file
+            try {
+                // If it's a JS file with export, try to extract JSON
+                const jsonMatch = text.match(/const products = (\[.*?\])/s);
+                if (jsonMatch) {
+                    allProducts = JSON.parse(jsonMatch[1]);
+                } else {
+                    // Try to parse the whole file as JSON
+                    allProducts = JSON.parse(text).products || [];
+                }
+            } catch (e) {
+                console.error('Error parsing products:', e);
+                allProducts = [];
+            }
+        }
+        
+        console.log('Loaded products:', allProducts.length);
+        
+        // Setup search functionality
+        setupProductSearch();
+        
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        showToast('Could not load products list', 'error');
+        // Fallback to empty array
+        allProducts = [];
+    }
+}
+// Setup product search functionality
+function setupProductSearch() {
+    const searchInput = document.getElementById('productSearch');
+    const resultsDiv = document.getElementById('productResults');
+    
+    if (!searchInput || !resultsDiv) return;
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        if (searchTerm.length < 2) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+        
+        // Filter products
+        const filtered = allProducts.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) ||
+            product.sku.toLowerCase().includes(searchTerm) ||
+            (product.category && product.category.toLowerCase().includes(searchTerm))
+        );
+        
+        if (filtered.length === 0) {
+            resultsDiv.innerHTML = '<div class="product-result-item" style="color: #666; font-style: italic;">No products found</div>';
+            resultsDiv.style.display = 'block';
+            return;
+        }
+        
+        // Display results
+        resultsDiv.innerHTML = filtered.slice(0, 10).map(product => `
+            <div class="product-result-item" data-product-id="${product.id}">
+                <div style="flex: 1;">
+                    <div class="product-name">${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''}</div>
+                    <div style="font-size: 12px; color: #666;">${product.category || 'Uncategorized'}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="product-price">${formatUGX(product.price)}</div>
+                    <div class="product-sku">${product.sku || 'N/A'}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        resultsDiv.style.display = 'block';
+        
+        // Add click event to results
+        resultsDiv.querySelectorAll('.product-result-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                const product = allProducts.find(p => p.id == productId);
+                
+                if (product) {
+                    addProductToReceipt(product);
+                    searchInput.value = '';
+                    resultsDiv.style.display = 'none';
+                    showToast(`Added ${product.name.substring(0, 30)}...`);
+                }
+            });
+        });
+    });
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
+// Add product to receipt
+function addProductToReceipt(product) {
+    // Check if product already exists in receipt
+    const existingIndex = receiptItems.findIndex(item => 
+        item.name.toLowerCase() === product.name.toLowerCase() || 
+        item.sku === product.sku
+    );
+    
+    if (existingIndex >= 0) {
+        // Increment quantity if already exists
+        receiptItems[existingIndex].quantity += 1;
+        receiptItems[existingIndex].total = receiptItems[existingIndex].quantity * receiptItems[existingIndex].price;
+    } else {
+        // Add new item
+        const item = {
+            id: product.id || Date.now(),
+            name: product.name,
+            quantity: 1,
+            price: product.price,
+            total: product.price,
+            sku: product.sku
+        };
+        receiptItems.push(item);
+    }
+    
+    renderItems();
+    updateReceiptPreview();
+}
+
+
+        
+        // Setup Firebase auth state listener for session management
+        auth.onAuthStateChanged((firebaseUser) => {
+            if (!user.isGuest && !firebaseUser) {
+                // Firebase session expired - notify user but don't redirect immediately
+                console.log('Firebase session expired');
+                // You can show a toast message here if needed
+                // showToast('Session expired, please login again', 'error');
+            }
+        });
+        
+        // Load user receipts if logged in
+        if (!user.isGuest) {
+            await loadUserReceipts();
+            await syncBackupReceiptsToFirebase();
+        }
+    }
+    
+    // Initialize receipt system
+    initializeReceipt();
+    setupEventListeners();
+    loadProducts();
+});
+
+        // ========== NEW FUNCTIONS FOR SAVING RECEIPTS ==========
+
+// Function to prepare receipt data for saving
+function prepareReceiptData() {
+    const now = new Date();
+    const receiptNumber = generateReceiptNumber();
+    const transactionId = generateTransactionId();
+    
+    // Filter valid items
+    const itemsToSave = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+    
+    if (itemsToSave.length === 0) {
+        return null;
+    }
+    
+    const subtotal = itemsToSave.reduce((sum, item) => sum + item.total, 0);
+    let deliveryFee = 0;
+    if (!document.getElementById('freeDelivery').checked) {
+        deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+    }
+    const total = subtotal + deliveryFee;
+    
+    // Prepare receipt object
+    const receiptData = {
+        id: Date.now().toString(), // Unique ID
+        receiptNumber: receiptNumber,
+        transactionId: transactionId,
+        timestamp: now.toISOString(),
+        customerName: document.getElementById('customerName').value || 'Walk-in',
+        storeName: document.getElementById('storeName').value,
+        storePhone: document.getElementById('storePhone').value,
+        paymentMethod: document.getElementById('paymentMethod').value,
+        freeDelivery: document.getElementById('freeDelivery').checked,
+        deliveryFee: deliveryFee,
+        subtotal: subtotal,
+        totalAmount: total,
+        items: itemsToSave.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total
+        }))
+    };
+    
+    return receiptData;
+}
+
+
+// Function to show saved receipt toast
+function showSavedReceiptToast(receiptNumber) {
+    showToast(`Receipt ${receiptNumber} saved to history! <a href="receipts.html" style="color: white; text-decoration: underline;">View History</a>`, 'success');
+}
+        // Add delivery fee listeners
+document.getElementById('deliveryFee').addEventListener('input', updateReceiptPreview);
+document.getElementById('freeDelivery').addEventListener('change', function() {
+    const feeInput = document.getElementById('deliveryFee');
+    if (this.checked) {
+        feeInput.disabled = true;
+        feeInput.value = '0';
+    } else {
+        feeInput.disabled = false;
+        feeInput.value = '5000';
+    }
+    updateReceiptPreview();
+});
+        
+        function initializeReceipt() {
+            addEmptyItem();
+            updateReceiptPreview();
+        }
+        
+        function setupEventListeners() {
+            // Printer modal
+            document.getElementById('selectPrinter').addEventListener('click', () => {
+                document.getElementById('printerModal').style.display = 'block';
+            });
+            
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('printerModal').style.display = 'none';
+            });
+            
+            // Printer selection
+            document.querySelectorAll('.printer-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.printer-option').forEach(o => {
+                        o.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    selectedPrinterMethod = this.dataset.method;
+                });
+            });
+            
+            // Confirm method
+            document.getElementById('confirmMethod').addEventListener('click', function() {
+                if (!selectedPrinterMethod) {
+                    showToast('Please select a method first', 'error');
+                    return;
+                }
+                
+                document.getElementById('printerModal').style.display = 'none';
+                
+                const statusDiv = document.getElementById('printerStatus');
+                const testBtn = document.getElementById('testPrint');
+                const printBtn = document.getElementById('printReceipt');
+                
+                if (selectedPrinterMethod === 'usb-network') {
+                    statusDiv.className = 'printer-status status-connected';
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Ready for printing</span>';
+                    testBtn.disabled = false;
+                    printBtn.disabled = false;
+                    showToast('Ready to print!');
+                } else if (selectedPrinterMethod === 'web-bluetooth') {
+                    connectBluetooth();
+                }
+            });
+            
+            // Add item
+            document.getElementById('addItem').addEventListener('click', () => {
+                addEmptyItem();
+            });
+            
+            // Print receipt
+            document.getElementById('printReceipt').addEventListener('click', function() {
+                printReceipt();
+            });
+            
+            // Test print
+            document.getElementById('testPrint').addEventListener('click', testPrint);
+            
+            // Preview
+            document.getElementById('previewReceipt').addEventListener('click', updateReceiptPreview);
+            
+            // Clear
+            document.getElementById('clearAll').addEventListener('click', () => {
+                if (confirm('Clear all items?')) {
+                    receiptItems = [];
+                    document.getElementById('itemsContainer').innerHTML = '';
+                    addEmptyItem();
+                    showToast('Cleared all items');
+                }
+            });
+            
+            // Auto-update preview
+            // Add 'deliveryFee' and 'freeDelivery' to this array
+['storeName', 'storePhone', 'customerName', 'paymentMethod', 'deliveryFee'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateReceiptPreview);
+});
+        }
+        
+        function addEmptyItem() {
+            const item = {
+                id: Date.now(),
+                name: '',
+                quantity: 1,
+                price: 0,
+                total: 0
+            };
+            
+            receiptItems.push(item);
+            renderItems();
+            updateReceiptPreview();
+        }
+        
+        async function connectBluetooth() {
+            const statusDiv = document.getElementById('printerStatus');
+            const testBtn = document.getElementById('testPrint');
+            const printBtn = document.getElementById('printReceipt');
+            
+            try {
+                if (!navigator.bluetooth) {
+                    showToast('Bluetooth not supported', 'error');
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Searching for printers...</span>';
+                
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting...</span>';
+                
+                const server = await bluetoothDevice.gatt.connect();
+                
+                statusDiv.className = 'printer-status status-connected';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected to printer</span>';
+                testBtn.disabled = false;
+                printBtn.disabled = false;
+                
+                showToast('Bluetooth printer connected!');
+                
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                    statusDiv.className = 'printer-status status-disconnected';
+                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Printer disconnected</span>';
+                    testBtn.disabled = true;
+                    printBtn.disabled = true;
+                    showToast('Printer disconnected', 'error');
+                });
+                
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                statusDiv.className = 'printer-status status-disconnected';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Not connected</span>';
+                showToast('Bluetooth connection failed', 'error');
+            }
+        }
+        
+        function renderItems() {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            
+            receiptItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.style.display = 'grid';
+                div.style.gridTemplateColumns = '2fr 1fr 1fr 1fr auto';
+                div.style.gap = '5px';
+                div.style.marginBottom = '10px';
+                
+                div.innerHTML = `
+                    <input type="text" class="form-control" value="${item.name}" 
+                           data-index="${index}" placeholder="Item name" style="font-size: 14px; padding: 8px;">
+                    <input type="number" class="form-control" value="${item.quantity}" 
+                           data-index="${index}" min="1" placeholder="Qty" style="font-size: 14px; padding: 8px;">
+                    <input type="number" class="form-control" value="${item.price}" 
+                           data-index="${index}" step="1000" placeholder="Price" style="font-size: 14px; padding: 8px;">
+                    <input type="text" class="form-control" value="${formatUGX(item.total)}" readonly 
+                           style="font-size: 14px; padding: 8px; background-color: #f9fafb;">
+                    <button class="btn btn-danger" data-index="${index}" 
+                            style="padding: 8px; min-width: 40px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('input[data-index]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    updateItem(index);
+                });
+            });
+            
+            document.querySelectorAll('button[data-index]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    receiptItems.splice(index, 1);
+                    if (receiptItems.length === 0) {
+                        addEmptyItem();
+                    } else {
+                        renderItems();
+                    }
+                    updateReceiptPreview();
+                });
+            });
+        }
+        
+        function updateItem(index) {
+            const inputs = document.querySelectorAll(`input[data-index="${index}"]`);
+            if (inputs.length < 3) return;
+            
+            receiptItems[index] = {
+                ...receiptItems[index],
+                name: inputs[0].value,
+                quantity: parseInt(inputs[1].value) || 0,
+                price: parseInt(inputs[2].value) || 0,
+                total: (parseInt(inputs[1].value) || 0) * (parseInt(inputs[2].value) || 0)
+            };
+            
+            if (inputs[3]) {
+                inputs[3].value = formatUGX(receiptItems[index].total);
+            }
+            
+            updateReceiptPreview();
+        }
+        
+        function updateReceiptPreview() {
+            const preview = document.getElementById('receiptPreview');
+            const now = new Date();
+            const receiptNumber = generateReceiptNumber();
+            const transactionId = generateTransactionId();
+            
+            // Filter valid items
+            const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+            const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
+            let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+             const total = subtotal + deliveryFee;
+            
+            let itemsHTML = '';
+            if (validItems.length > 0) {
+                itemsHTML = validItems.map(item => {
+    let displayName = item.name;
+    if (displayName.length > 22) {
+        displayName = displayName.substring(0, 19) + '...';
+    }
+    
+    return `
+    <div style="margin-bottom: 1px;">
+        <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+            <span style="display: inline-block; width: 22ch; text-align: left; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
+            <span style="display: inline-block; width: 3ch; text-align: right;">${item.quantity}</span>
+            <span style="display: inline-block; width: 10ch; text-align: right;">${formatUGX(item.total)}</span>
+        </span>
+    </div>
+    `;
+}).join('');
+            } else {
+                itemsHTML = '<div style="text-align: center; padding: 5px 0; font-size: 8px; color: #666;">No items added</div>';
+            }
+            
+            preview.innerHTML = `
+                <div style="text-align: center; margin-bottom: 5px;">
+                    <div style="font-weight: bold; font-size: 11px; margin-bottom: 1px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
+                    <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle \n With Authentic Tech</div>
+                    <div style="font-size: 7px; margin-bottom: 1px;">www.willstech.store</div>
+                    <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
+                </div>
+                
+                <div style="border-top: 1px dashed #000; margin: 3px 0; padding-top: 3px;">
+                    <div style="text-align: center; font-size: 10px; font-weight: bold;">SALES RECEIPT</div>
+                </div>
+                
+                <div style="font-size: 8px; margin: 4px 0; line-height: 1.2;">
+                    <div><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    <div><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div><strong>Receipt:</strong> ${receiptNumber.substring(0, 15)}</div>
+                    <div><strong>Customer:</strong> ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}</div>
+                </div>
+                
+                <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                
+                <div style="font-size: 8px; margin-bottom: 2px;">
+    <div style="font-weight: bold; margin-bottom: 1px;">
+        <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+            <span style="display: inline-block; width: 22ch; text-align: left;">ITEM</span>
+            <span style="display: inline-block; width: 3ch; text-align: right;">QTY</span>
+            <span style="display: inline-block; width: 10ch; text-align: right;">AMOUNT</span>
+        </span>
+    </div>
+</div>
+
+<div style="font-size: 8px; margin-bottom: 4px;">
+    ${itemsHTML}
+</div>
+                
+                ${validItems.length > 0 ? `
+                <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                
+                <div style="font-size: 9px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>Subtotal:</span>
+                        <span>${formatUGX(subtotal)}</span>
+                    </div>
+                    ${deliveryFee > 0 ? `
+<div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+    <span>Delivery Fee:</span>
+    <span>${formatUGX(deliveryFee)}</span>
+</div>
+` : ''}
+                    <div style="display: flex; justify-content: space-between; margin-top: 3px; padding-top: 3px; border-top: 1px solid #000; font-weight: bold;">
+                        <span>TOTAL:</span>
+                        <span style="font-size: 10px;">${formatUGX(total)}</span>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                ` : ''}
+                
+                <div style="text-align: center; font-size: 8px; margin-top: 6px; line-height: 1.2;">
+                    <div><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
+                    <div style="color: green; font-weight: bold; margin: 2px 0;">✓ Payment received.</div>
+                    <div style="font-weight: bold; margin: 2px 0; font-size: 7px;">THANKS FOR YOUR PURCHASE!</div>
+                    <div>${document.getElementById('storeName').value.substring(0, 20)}</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 8px; font-size: 7px; color: #666; line-height: 1.1;">
+                    <div>For inquiries: ${document.getElementById('storePhone').value}</div>
+                    <div>Email: info@willstech.store</div>
+                    <div>Website: willstech.store</div>
+                    <div style="margin-top: 2px;">*************************</div>
+                </div>
+            `;
+        }
+        
+        function testPrint() {
+    if (!selectedPrinterMethod) {
+        showToast('Select printer method first', 'error');
+        return;
+    }
+    
+    if (selectedPrinterMethod === 'usb-network') {
+        printTestReceiptViaSystem();
+    } else if (selectedPrinterMethod === 'web-bluetooth') {
+        printTestReceiptViaBluetooth();
+    }
+    
+    // Show message that test prints are not saved
+    showToast('Test print - not saved to history', 'success');
+}
+        
+        function printReceipt() {
+    console.log('Print Receipt function called');
+    
+    if (!selectedPrinterMethod) {
+        showToast('Select printer method first', 'error');
+        return;
+    }
+    
+    // Filter out empty items
+    const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+    
+    if (validItems.length === 0) {
+        showToast('Add items with valid names and prices first', 'error');
+        return;
+    }
+    
+    console.log('Valid items found:', validItems.length);
+    
+    // ========== SAVE RECEIPT ==========
+    const receiptData = prepareReceiptData();
+    if (receiptData) {
+        // Save to local storage
+        saveReceiptToLocalStorage(receiptData);
+        
+        // Save to user account if logged in
+        const user = getCurrentUser();
+        if (user && !user.isGuest) {
+            saveReceiptToUserAccount(receiptData);
+        }
+        
+        showSavedReceiptToast(receiptData.receiptNumber);
+    }
+    // ========== END SAVE CODE ==========
+    
+    if (selectedPrinterMethod === 'usb-network') {
+        printReceiptViaSystem();
+    } else if (selectedPrinterMethod === 'web-bluetooth') {
+        printReceiptViaBluetooth();
+    }
+}
+// Function to save receipt to localStorage
+function saveReceiptToLocalStorage(receiptData) {
+    // Get existing receipts
+    const storedReceipts = localStorage.getItem('willstech_receipts');
+    const receipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    
+    // Add new receipt at the beginning (newest first)
+    receipts.unshift(receiptData);
+    
+    // Save back to localStorage
+    localStorage.setItem('willstech_receipts', JSON.stringify(receipts));
+    
+    // Update receipt counter
+    const counter = (parseInt(localStorage.getItem('willstech_receipt_counter')) || 0) + 1;
+    localStorage.setItem('willstech_receipt_counter', counter.toString());
+    
+    console.log('Receipt saved to localStorage:', receiptData.receiptNumber);
+    
+    // Return the updated receipts array
+    return receipts;
+        }
+// Save receipt to user account
+async function saveReceiptToUserAccount(receiptData) {
+    try {
+        const user = getCurrentUser();
+        if (user.isGuest) return;
+        
+        // Save to Firebase Firestore
+        await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .doc(receiptData.id)
+            .set({
+                ...receiptData,
+                userId: user.uid,
+                syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        console.log('Receipt saved to Firebase:', receiptData.receiptNumber);
+        
+    } catch (error) {
+        console.error('Error saving receipt to Firebase:', error);
+        // Fallback to localStorage
+        saveReceiptToLocalStorageBackup(receiptData);
+    }
+}
+
+// Add this helper function
+function saveReceiptToLocalStorageBackup(receiptData) {
+    const user = getCurrentUser();
+    const backupKey = `firebase_backup_${user.uid}`;
+    const backupReceipts = JSON.parse(localStorage.getItem(backupKey) || '[]');
+    
+    // Check if receipt already exists
+    const exists = backupReceipts.find(r => r.id === receiptData.id);
+    if (!exists) {
+        backupReceipts.push({
+            ...receiptData,
+            backupSavedAt: new Date().toISOString()
+        });
+        localStorage.setItem(backupKey, JSON.stringify(backupReceipts));
+        console.log('Saved to localStorage backup due to Firebase error');
+    }
+}
+// ADD THIS FUNCTION AFTER saveReceiptToUserAccount:
+async function syncBackupReceiptsToFirebase() {
+    const user = getCurrentUser();
+    if (user.isGuest) return;
+    
+    const backupKey = `firebase_backup_${user.uid}`;
+    const backupReceipts = JSON.parse(localStorage.getItem(backupKey) || '[]');
+    
+    if (backupReceipts.length === 0) return;
+    
+    try {
+        showToast('Syncing backup receipts to cloud...', 'success');
+        
+        for (const receipt of backupReceipts) {
+            await db.collection('users')
+                .doc(user.uid)
+                .collection('receipts')
+                .doc(receipt.id)
+                .set({
+                    ...receipt,
+                    userId: user.uid,
+                    syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+        }
+        
+        // Clear backup after successful sync
+        localStorage.removeItem(backupKey);
+        showToast(`Synced ${backupReceipts.length} backup receipts to cloud`, 'success');
+        
+    } catch (error) {
+        console.error('Failed to sync backup receipts:', error);
+    }
+}      
+        
+        function printReceiptViaSystem() {
+            const now = new Date();
+            const receiptNumber = generateReceiptNumber();
+            const transactionId = generateTransactionId();
+            
+            // Filter valid items
+            const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+            const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
+            let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+const total = subtotal + deliveryFee;
+            
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Receipt</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: 58mm auto;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            body {
+                                margin: 0;
+                                padding: 2mm 1mm;
+                                font-family: 'Courier New', monospace;
+                                font-size: 8px;
+                                line-height: 1.1;
+                                width: 56mm;
+                                max-width: 56mm;
+                            }
+                        }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 8px;
+                            line-height: 1.1;
+                            margin: 2mm 1mm;
+                            padding: 0;
+                            width: 56mm;
+                            max-width: 56mm;
+                        }
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .dashed { border-bottom: 1px dashed #000; margin: 2px 0; }
+                        .item-row { display: flex; justify-content: space-between; margin-bottom: 1px; }
+                        .footer { margin-top: 10px; font-size: 7px; color: #666; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div style="text-align: center; margin-bottom: 3px;">
+                        <div class="bold" style="font-size: 10px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
+                        <div style="font-size: 7px;">Elevate Your Lifestyle With \n Authentic Tech</div>
+                        <div style="font-size: 7px;">www.willstech.store</div>
+                        <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
+                    </div>
+                    
+                    <div class="dashed" style="padding-top: 2px;">
+                        <div class="center bold" style="font-size: 9px;">SALES RECEIPT</div>
+                    </div>
+                    
+                    <div style="font-size: 8px; margin: 3px 0;">
+                        <div><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        <div><strong>Receipt:</strong> ${receiptNumber.substring(0, 15)}</div>
+                        <div><strong>Customer:</strong> ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}</div>
+                    </div>
+                    
+                    <div class="dashed"></div>
+                    
+                    <div style="font-size: 8px; margin-bottom: 2px;">
+                        <div class="item-row bold">
+                            <span style="flex: 3;">ITEM</span>
+                            <span style="flex: 1; text-align: right;">QTY</span>
+                            <span style="flex: 2; text-align: right;">AMOUNT</span>
+                        </div>
+                    </div>
+                    
+                    ${itemsToPrint.map(item => `
+                        <div class="item-row" style="font-size: 8px;">
+                            <span style="flex: 3;">${item.name.substring(0, 20)}</span>
+                            <span style="flex: 1; text-align: right;">${item.quantity}</span>
+                            <span style="flex: 2; text-align: right;">${formatUGX(item.total)}</span>
+                        </div>
+                    `).join('')}
+                    
+                    <div class="dashed"></div>
+                    
+                    <div style="font-size: 9px;">
+                        <div class="item-row">
+                            <span>Subtotal:</span>
+                            <span>${formatUGX(subtotal)}</span>
+                        </div>
+                       ${deliveryFee > 0 ? `
+<div class="item-row">
+    <span>Delivery Fee:</span>
+    <span>${formatUGX(deliveryFee)}</span>
+</div>
+` : ''}
+                        <div class="item-row" style="margin-top: 3px; padding-top: 2px; border-top: 1px solid #000; font-weight: bold;">
+                            <span>TOTAL:</span>
+                            <span style="font-size: 10px;">${formatUGX(total)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="dashed"></div>
+                    
+                    <div class="center" style="font-size: 8px; margin-top: 5px;">
+                        <div><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
+                        <div style="color: green; font-weight: bold;">✓ Payment received.</div>
+                        <div class="bold">THANK YOU FOR SHOPPING</div>
+                        <div>${document.getElementById('storeName').value.substring(0, 20)}</div>
+                    </div>
+                    
+                    <div class="footer">
+                        <div>For inquiries: ${document.getElementById('storePhone').value}</div>
+                        <div>Email: info@willstech.store</div>
+                        <div>Website: willstech.store</div>
+                        <div style="margin-top: 2px;">*************************</div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; text-align: center; font-size: 7px; color: #999;">
+                        --- Tear here ---
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 100);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            showToast('Printing receipt...');
+        }
+        
+        function printTestReceiptViaSystem() {
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Test Print</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: 58mm auto;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            body {
+                                margin: 10mm 1mm;
+                                padding: 0;
+                                font-family: 'Courier New', monospace;
+                                font-size: 10px;
+                                width: 56mm;
+                                text-align: center;
+                            }
+                        }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 10px;
+                            margin: 10mm 1mm;
+                            padding: 0;
+                            width: 56mm;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div style="font-weight: bold; margin-bottom: 10px; font-size: 12px;">TEST PRINT</div>
+                    <div>Will's Tech Store</div>
+                    <div>Kampala, Uganda</div>
+                    <div style="margin-top: 10px;">Print alignment test</div>
+                    <div>-------------------</div>
+                    <div style="margin-top: 20px; color: green; font-weight: bold;">✓ Printer working correctly</div>
+                    <div style="margin-top: 30px;">${new Date().toLocaleString()}</div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 100);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            showToast('Printing test...');
+        }
+        
+        async function printReceiptViaBluetooth() {
+            if (!bluetoothDevice) {
+                showToast('Bluetooth printer not connected', 'error');
+                return;
+            }
+            
+            try {
+                const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+                
+                if (itemsToPrint.length === 0) {
+                    showToast('No valid items to print', 'error');
+                    return;
+                }
+                
+                const now = new Date();
+                const receiptNumber = generateReceiptNumber();
+                const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
+                let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+const total = subtotal + deliveryFee;
+                
+                // Create ESC/POS commands
+                let escpos = "\x1B\x40"; // Initialize
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "\x1B\x21\x08"; // Emphasized
+                escpos += "WILL'S TECH STORE\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "Elevate Your Lifestyle With\nAuthentic Tech\n";
+                escpos += "www.willstech.store\n";
+                escpos += "Tel: +256 751 924 844\n";
+                escpos += "-------------------------------\n";
+                escpos += "\x1B\x21\x08"; // Emphasized
+                escpos += "SALES RECEIPT\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "-------------------------------\n";
+                escpos += "\x1B\x61\x00"; // Left align
+                
+                // Receipt details
+                escpos += `Date: ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}\n`;
+                escpos += `Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}\n`;
+                escpos += `Receipt: ${receiptNumber.substring(0, 15)}\n`;
+                escpos += `Customer: ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}\n`;
+                escpos += "-------------------------------\n";
+                
+               // First, find the maximum lengths needed for each column
+let maxNameLength = 0;
+let maxQtyLength = 0;
+let maxAmountLength = 0;
+
+// Calculate maximum lengths from actual data
+itemsToPrint.forEach(item => {
+    // Name length (max 30 characters to avoid overflow)
+    const nameLength = Math.min(item.name.length, 30);
+    maxNameLength = Math.max(maxNameLength, nameLength);
+    
+    // Quantity length
+    const qtyLength = item.quantity.toString().length;
+    maxQtyLength = Math.max(maxQtyLength, qtyLength);
+    
+    // Amount length
+    const formattedAmount = formatUGX(item.total);
+    maxAmountLength = Math.max(maxAmountLength, formattedAmount.length);
+});
+
+// Add minimum padding for readability
+maxNameLength = Math.max(maxNameLength, 4);  // Minimum 4 chars for "ITEM"
+maxQtyLength = Math.max(maxQtyLength, 3);    // Minimum 3 chars for "QTY"
+maxAmountLength = Math.max(maxAmountLength, 6); // Minimum 6 chars for "AMOUNT"
+
+// Calculate QTY position - center it between name and amount
+const totalLineWidth = maxNameLength + 3 + maxQtyLength + 3 + maxAmountLength;
+const qtyStartPosition = maxNameLength + Math.floor((totalLineWidth - maxNameLength - maxAmountLength - maxQtyLength) / 2);
+
+// Items header - aligned with data columns
+// Items header - SIMPLIFIED ALIGNMENT
+escpos += "\x1B\x21\x08"; // Emphasized
+// Fixed column widths (optimized for 58mm paper)
+escpos += "ITEM".padEnd(17, ' ');
+escpos += "QTY".padStart(3, ' ');
+escpos += " AMOUNT".padStart(10, ' ');
+escpos += "\n";
+escpos += "\x1B\x21\x00"; // Normal
+
+// Items - SIMPLIFIED WITH FIXED WIDTHS
+itemsToPrint.forEach(item => {
+    // Truncate item name to fit column
+    let displayName = item.name;
+    if (displayName.length > 17) {
+        displayName = displayName.substring(0, 14) + '...';
+    }
+    
+    // Fixed column widths:
+    // Column 1: Item name (22 chars)
+    // Column 2: Quantity (3 chars, right-aligned)
+    // Column 3: Amount (10 chars, right-aligned)
+    escpos += displayName.padEnd(17, ' ');
+    escpos += item.quantity.toString().padStart(3, ' ');
+    escpos += formatUGX(item.total).padStart(10, ' ');
+    escpos += "\n";
+});
+                
+                escpos += "-------------------------------\n";
+                
+                // Totals
+                escpos += `Subtotal:       ${formatUGX(subtotal).padStart(10, ' ')}\n`;
+                if (deliveryFee > 0) {
+    escpos += `Delivery Fee:   ${formatUGX(deliveryFee).padStart(10, ' ')}\n`;
+}
+                escpos += "-------------------------------\n";
+                escpos += "\x1B\x21\x10"; // Double height
+                escpos += `TOTAL:          ${formatUGX(total).padStart(10, ' ')}\n`;
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "-------------------------------\n";
+                
+                // Payment info
+                escpos += `Payment: ${document.getElementById('paymentMethod').value}\n`;
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "\x1B\x21\x08"; // Emphasized
+                escpos += "✓ Payment received.\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "THANK YOU FOR SHOPPING\n";
+                escpos += "WITH US!\n\n";
+                
+                // Footer
+                escpos += "For inquiries call:\n";
+                escpos += "+256 751 924 844\n";
+                escpos += "Email: info@willstech.store\n";
+                escpos += "Website: willstech.store\n";
+                escpos += "**************************\n\n\n\n\n";
+                
+                // Cut paper
+                escpos += "\x1D\x56\x41\x00"; // Partial cut
+                
+                // Send to Bluetooth
+                if (!bluetoothDevice.gatt.connected) {
+                    await bluetoothDevice.gatt.connect();
+                }
+                
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                
+                // Split into chunks for reliable transmission
+                const encoder = new TextEncoder();
+                const chunks = splitString(escpos, 100);
+                
+                for (let i = 0; i < chunks.length; i++) {
+                    await characteristic.writeValue(encoder.encode(chunks[i]));
+                    if (i < chunks.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 20));
+                    }
+                }
+                
+                showToast('Receipt sent to Bluetooth printer!');
+                
+            } catch (error) {
+                console.error('Bluetooth print error:', error);
+                showToast('Printing failed', 'error');
+            }
+        }
+        
+        function splitString(str, maxLength) {
+            const chunks = [];
+            for (let i = 0; i < str.length; i += maxLength) {
+                chunks.push(str.substring(i, i + maxLength));
+            }
+            return chunks;
+        }
+        
+        async function printTestReceiptViaBluetooth() {
+            if (!bluetoothDevice) {
+                showToast('Bluetooth printer not connected', 'error');
+                return;
+            }
+            
+            try {
+                let escpos = "\x1B\x40"; // Initialize
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "\x1B\x21\x10"; // Double height
+                escpos += "TEST PRINT\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "-------------------------------\n";
+                escpos += "Will's Tech Store\n";
+                escpos += "Printer Test\n";
+                escpos += "---------------------------------\n";
+                escpos += "Print alignment test\n";
+                escpos += "for thermal printer\n";
+                escpos += "-------------------------------\n";
+                escpos += "\x1B\x21\x08"; // Emphasized
+                escpos += "✓ PRINT OK\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += `${new Date().toLocaleString()}\n`;
+                escpos += "\n\n\n";
+                escpos += "\x1D\x56\x41\x00"; // Partial cut
+                
+                if (!bluetoothDevice.gatt.connected) {
+                    await bluetoothDevice.gatt.connect();
+                }
+                
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                
+                const encoder = new TextEncoder();
+                await characteristic.writeValue(encoder.encode(escpos));
+                
+                showToast('Test print sent!');
+                
+            } catch (error) {
+                console.error('Test print error:', error);
+                showToast('Test print failed', 'error');
+            }
+        }
+    </script>
+    <div class="card">
+    <h2 class="card-title"><i class="fas fa-info-circle"></i> Receipt Number Format</h2>
+    <div style="font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+        <div><strong>Format:</strong> WTS-YYYYMMDD-HHMMSSmmmRR</div>
+        <div><strong>Example:</strong> WTS-20241212-14304512345</div>
+        <div><strong>Decodes to:</strong> 12/12/2024 at 14:30:45.123</div>
+        <div style="margin-top: 10px; font-size: 10px;">
+            <div>YYYY = Year (2024)</div>
+            <div>MM = Month (12)</div>
+            <div>DD = Day (12)</div>
+            <div>HH = Hour (14 = 2 PM)</div>
+            <div>MM = Minute (30)</div>
+            <div>SS = Second (45)</div>
+            <div>mmm = Millisecond (123)</div>
+            <div>RR = Random digits (45)</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
