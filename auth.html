@@ -681,6 +681,43 @@
         .hidden {
             display: none;
         }
+        
+        /* Company Information Section Styling */
+        .company-section {
+            background: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .company-section h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .user-info-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .user-info-preview h4 {
+            margin: 0 0 10px 0;
+            color: #374151;
+        }
+        
+        .user-info-preview p {
+            margin: 5px 0;
+            color: #6b7280;
+        }
+        
+        .user-info-preview strong {
+            color: #111827;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="config.js"></script>
@@ -787,6 +824,50 @@
                         <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirm your password" required>
                     </div>
                     
+                    <!-- Company Information Section -->
+                    <div class="company-section">
+                        <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">
+                            <i class="fas fa-store"></i> Company Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company Name *</label>
+                            <input type="text" id="companyName" class="form-control" placeholder="Your Business Name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company Phone *</label>
+                            <input type="tel" id="companyPhone" class="form-control" placeholder="+256 123 456 789" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company Email</label>
+                            <input type="email" id="companyEmail" class="form-control" placeholder="info@yourcompany.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company Website</label>
+                            <input type="url" id="companyWebsite" class="form-control" placeholder="yourcompany.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company Address</label>
+                            <input type="text" id="companyAddress" class="form-control" placeholder="City, Country">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Currency</label>
+                            <select id="companyCurrency" class="form-control">
+                                <option value="UGX">UGX - Ugandan Shilling</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="KES">KES - Kenyan Shilling</option>
+                                <option value="TZS">TZS - Tanzanian Shilling</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="form-group remember-me">
                         <input type="checkbox" id="agreeTerms" required>
                         <label for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
@@ -836,6 +917,70 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
+
+    <!-- Company Details Modal for First-Time Google Users -->
+    <div id="companyDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2><i class="fas fa-store"></i> Complete Your Company Profile</h2>
+                <button class="close-modal" id="closeCompanyModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="companyModalError" class="error-message"></div>
+                
+                <div class="user-info-preview" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4>Account Information</h4>
+                    <p><strong>Name:</strong> <span id="modalUserName"></span></p>
+                    <p><strong>Email:</strong> <span id="modalUserEmail"></span></p>
+                </div>
+                
+                <form id="companyDetailsForm">
+                    <h3>Company Information</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Name *</label>
+                        <input type="text" id="modalCompanyName" class="form-control" placeholder="Your Business Name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Phone *</label>
+                        <input type="tel" id="modalCompanyPhone" class="form-control" placeholder="+256 123 456 789" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Email</label>
+                        <input type="email" id="modalCompanyEmail" class="form-control" placeholder="info@yourcompany.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Website</label>
+                        <input type="url" id="modalCompanyWebsite" class="form-control" placeholder="yourcompany.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Address</label>
+                        <input type="text" id="modalCompanyAddress" class="form-control" placeholder="City, Country">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select id="modalCompanyCurrency" class="form-control">
+                            <option value="UGX">UGX - Ugandan Shilling</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="TZS">TZS - Tanzanian Shilling</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                        <i class="fas fa-save"></i> Save Company Details
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -948,7 +1093,7 @@
         // =============================================
         
         // 1. REGISTER WITH EMAIL/PASSWORD
-        async function registerUserFirebase(name, email, password) {
+        async function registerUserFirebase(name, email, password, companyDetails = {}) {
             try {
                 showToast('Creating account...', 'success');
                 
@@ -961,28 +1106,39 @@
                     displayName: name
                 });
                 
-                // Create user document in Firestore
+                // Create user document in Firestore with company details
                 await db.collection('users').doc(user.uid).set({
                     uid: user.uid,
                     name: name,
                     email: email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    storeName: "Will's Tech Store",
-                    storePhone: "+256 751 924 844",
+                    storeName: companyDetails.companyName || "Will's Tech Store",
+                    storePhone: companyDetails.companyPhone || "+256 751 924 844",
+                    storeEmail: companyDetails.companyEmail || email,
+                    storeWebsite: companyDetails.companyWebsite || '',
+                    storeAddress: companyDetails.companyAddress || '',
                     settings: {
-                        currency: "UGX",
+                        currency: companyDetails.companyCurrency || "UGX",
                         receiptCounter: 0,
-                        timezone: "Africa/Kampala"
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     },
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                     provider: 'email'
                 });
                 
-                // Save session
+                // Save session with company details
                 saveUserSession({
                     uid: user.uid,
                     name: name,
-                    email: email
+                    email: email,
+                    storeName: companyDetails.companyName || "Will's Tech Store",
+                    storePhone: companyDetails.companyPhone || "+256 751 924 844",
+                    storeEmail: companyDetails.companyEmail || email,
+                    storeWebsite: companyDetails.companyWebsite || '',
+                    storeAddress: companyDetails.companyAddress || '',
+                    isGuest: false,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
                 });
                 
                 // Sync local receipts to Firebase
@@ -1138,25 +1294,9 @@
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 
                 if (!userDoc.exists) {
-                    // First time Google login - create user document
-                    await db.collection('users').doc(user.uid).set({
-                        uid: user.uid,
-                        name: user.displayName,
-                        email: user.email,
-                        photoURL: user.photoURL,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        storeName: "Will's Tech Store",
-                        storePhone: "+256 751 924 844",
-                        settings: {
-                            currency: "UGX",
-                            receiptCounter: 0,
-                            timezone: "Africa/Kampala"
-                        },
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                        provider: 'google'
-                    });
-                    
-                    showToast('Welcome! Account created with Google.', 'success');
+                    // First time Google login - show company details modal
+                    showCompanyDetailsModal(user);
+                    return; // Don't proceed until company details are saved
                 } else {
                     // Update last login
                     await db.collection('users').doc(user.uid).update({
@@ -1318,11 +1458,108 @@
                 showToast('Password reset email sent! Check your inbox.', 'success');
             } catch (error) {
                 console.error('Password reset error:', error);
-                showToast('Error sending reset email: ' + error.message, 'error');
+                showToast('Error sending password reset email', 'error');
             }
         }
         
-                // =============================================
+        // 6. COMPANY DETAILS MODAL FUNCTIONS
+        let pendingGoogleUser = null;
+        
+        function showCompanyDetailsModal(user) {
+            pendingGoogleUser = user;
+            
+            // Populate user info in modal
+            document.getElementById('modalUserName').textContent = user.displayName || 'User';
+            document.getElementById('modalUserEmail').textContent = user.email || '';
+            
+            // Show modal
+            document.getElementById('companyDetailsModal').style.display = 'block';
+        }
+        
+        function hideCompanyDetailsModal() {
+            document.getElementById('companyDetailsModal').style.display = 'none';
+            pendingGoogleUser = null;
+        }
+        
+        async function saveCompanyDetails(e) {
+            e.preventDefault();
+            
+            if (!pendingGoogleUser) {
+                showToast('Error: No user session found', 'error');
+                return;
+            }
+            
+            // Get form values
+            const companyName = document.getElementById('modalCompanyName').value.trim();
+            const companyPhone = document.getElementById('modalCompanyPhone').value.trim();
+            const companyEmail = document.getElementById('modalCompanyEmail').value.trim();
+            const companyWebsite = document.getElementById('modalCompanyWebsite').value.trim();
+            const companyAddress = document.getElementById('modalCompanyAddress').value.trim();
+            const companyCurrency = document.getElementById('modalCompanyCurrency').value;
+            
+            // Validate required fields
+            if (!companyName || !companyPhone) {
+                document.getElementById('companyModalError').textContent = 'Company name and phone are required';
+                return;
+            }
+            
+            try {
+                showToast('Creating your account...', 'success');
+                
+                // Create user document with company details
+                await db.collection('users').doc(pendingGoogleUser.uid).set({
+                    uid: pendingGoogleUser.uid,
+                    name: pendingGoogleUser.displayName,
+                    email: pendingGoogleUser.email,
+                    photoURL: pendingGoogleUser.photoURL,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    storeName: companyName,
+                    storePhone: companyPhone,
+                    storeEmail: companyEmail || pendingGoogleUser.email,
+                    storeWebsite: companyWebsite || '',
+                    storeAddress: companyAddress || '',
+                    settings: {
+                        currency: companyCurrency,
+                        receiptCounter: 0,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    },
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    provider: 'google',
+                    isFirstTime: false
+                });
+                
+                // Save session
+                saveUserSession({
+                    uid: pendingGoogleUser.uid,
+                    name: pendingGoogleUser.displayName,
+                    email: pendingGoogleUser.email,
+                    photoURL: pendingGoogleUser.photoURL,
+                    storeName: companyName,
+                    storePhone: companyPhone,
+                    storeEmail: companyEmail || pendingGoogleUser.email,
+                    storeWebsite: companyWebsite || '',
+                    storeAddress: companyAddress || '',
+                    isGuest: false,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
+                });
+                
+                showToast('Account created successfully! Redirecting...', 'success');
+                
+                // Hide modal and redirect
+                hideCompanyDetailsModal();
+                
+                setTimeout(() => {
+                    window.location.href = 'Recieptprinter.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error saving company details:', error);
+                document.getElementById('companyModalError').textContent = 'Error saving company details. Please try again.';
+            }
+        }
+        
+        // =============================================
         // EVENT LISTENERS & INITIALIZATION
         // =============================================
         document.addEventListener('DOMContentLoaded', function() {
@@ -1376,6 +1613,10 @@
             document.getElementById('googleSignIn')?.addEventListener('click', signInWithGoogle);
             document.getElementById('googleSignUp')?.addEventListener('click', signInWithGoogle);
             
+            // Company Details Modal
+            document.getElementById('closeCompanyModal')?.addEventListener('click', hideCompanyDetailsModal);
+            document.getElementById('companyDetailsForm')?.addEventListener('submit', saveCompanyDetails);
+            
             // Login form
             document.getElementById('loginFormElement')?.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1403,9 +1644,22 @@
                 const password = document.getElementById('registerPassword').value;
                 const confirmPassword = document.getElementById('registerConfirmPassword').value;
                 
+                // Get company details
+                const companyName = document.getElementById('companyName').value.trim();
+                const companyPhone = document.getElementById('companyPhone').value.trim();
+                const companyEmail = document.getElementById('companyEmail').value.trim();
+                const companyWebsite = document.getElementById('companyWebsite').value.trim();
+                const companyAddress = document.getElementById('companyAddress').value.trim();
+                const companyCurrency = document.getElementById('companyCurrency').value;
+                
                 // Validation
                 if (!name || !email || !password || !confirmPassword) {
-                    showError('registerError', 'Please fill in all fields');
+                    showError('registerError', 'Please fill in all required fields');
+                    return;
+                }
+                
+                if (!companyName || !companyPhone) {
+                    showError('registerError', 'Company name and phone are required');
                     return;
                 }
                 
@@ -1429,7 +1683,14 @@
                     return;
                 }
                 
-                registerUserFirebase(name, email, password);
+                registerUserFirebase(name, email, password, {
+                    companyName,
+                    companyPhone,
+                    companyEmail,
+                    companyWebsite,
+                    companyAddress,
+                    companyCurrency
+                });
             });
             
             // Guest mode
