@@ -656,21 +656,14 @@
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<script src="config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Your Firebase configuration (use what you have)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
-    authDomain: "willstechstore-reciept.firebaseapp.com",
-    projectId: "willstechstore-reciept",
-    storageBucket: "willstechstore-reciept.firebasestorage.app",
-    messagingSenderId: "218930027222",
-    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
-    measurementId: "G-0K2H44N77D"
-  };
+  // Firebase configuration from config.js
+  const firebaseConfig = STORE_CONFIG.firebase;
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
@@ -679,18 +672,13 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
   // analytics is optional for receipts
-  
-  // Now you can use:
-  // auth.signInWithEmailAndPassword()
-  // db.collection().add()
-  // etc.
 </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
-            <p>Receipt Printing System - willstech.store</p>
+            <h1><i class="fas fa-store"></i> <span id="headerStoreName"></span>Will's Tech Store</span></h1>
+            <p>Receipt Printing System - <span id="headerStoreWebsite">willstech.store</span></p>
         </div>
         <!-- Add this right after the header div -->
 <div class="user-menu" style="position: absolute; top: 20px; right: 20px;">
@@ -1377,28 +1365,8 @@ function setupUserMenu() {
     }
 }
 
-// Initialize everything when DOM loads
-document.addEventListener('DOMContentLoaded', async function() {
-    // Check user session
-    const user = checkUserSession();
-    
-    if (user) {
-        // Update user menu
-        updateUserMenu();
-        // Setup user menu events
-        setupUserMenu();
-        
-        // Load user receipts if logged in
-        if (!user.isGuest) {
-            loadUserReceipts();
-        }
-    }
-    
-    // Initialize receipt system
-    initializeReceipt();
-    setupEventListeners();
-    loadProducts();
-});
+// Initialize user system when DOM loads (consolidated - no duplicate initialization)
+// This is now handled in the main DOMContentLoaded listener above
 
 // Load user receipts into local storage
 async function loadUserReceipts() {
@@ -1489,10 +1457,45 @@ async function loadUserReceipts() {
             return `TXN${timestamp}${random}`;
         }
         
-        // Format currency
+        // Initialize store values from config
+        function initializeStoreValues() {
+            if (typeof STORE_CONFIG !== 'undefined') {
+                // Update header
+                const headerStoreName = document.getElementById('headerStoreName');
+                const headerStoreWebsite = document.getElementById('headerStoreWebsite');
+                
+                if (headerStoreName) {
+                    headerStoreName.textContent = STORE_CONFIG.storeName;
+                }
+                if (headerStoreWebsite) {
+                    headerStoreWebsite.textContent = STORE_CONFIG.storeWebsite;
+                }
+                
+                // Update form fields
+                const storeNameInput = document.getElementById('storeName');
+                const storePhoneInput = document.getElementById('storePhone');
+                const deliveryFeeInput = document.getElementById('deliveryFee');
+                
+                if (storeNameInput && storeNameInput.value === 'Will\'s Tech Store') {
+                    storeNameInput.value = STORE_CONFIG.storeName;
+                }
+                if (storePhoneInput && storePhoneInput.value === '+256 751 924 844') {
+                    storePhoneInput.value = STORE_CONFIG.storePhone;
+                }
+                if (deliveryFeeInput && deliveryFeeInput.value === '5000') {
+                    deliveryFeeInput.value = STORE_CONFIG.receipt.deliveryFee;
+                }
+                
+                console.log('Store values initialized from config');
+            } else {
+                console.warn('STORE_CONFIG not available, using default values');
+            }
+        }
+        
+        // Update currency formatting function
         function formatUGX(amount) {
-    return 'UGX ' + amount.toLocaleString('en-US');
-}
+            return formatCurrency(amount);
+        }
         
         // Global variables
         let selectedPrinterMethod = null;
@@ -1641,15 +1644,34 @@ function addProductToReceipt(product) {
     updateReceiptPreview();
 }
 
-
+// Single consolidated initialization function
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Initializing application...');
+    
+    // Load configuration first
+    if (typeof STORE_CONFIG === 'undefined') {
+        console.error('Store configuration not loaded. Please ensure config.js is included.');
+        return;
+    }
+    
+    // Initialize store values from config
+    initializeStoreValues();
+    
+    // Check user session
+    const user = checkUserSession();
+    
+    if (user) {
+        console.log('User session found:', user.name);
+        // Update user menu (only once)
+        updateUserMenu();
+        // Setup user menu events (only once)
+        setupUserMenu();
         
         // Setup Firebase auth state listener for session management
         auth.onAuthStateChanged((firebaseUser) => {
             if (!user.isGuest && !firebaseUser) {
                 // Firebase session expired - notify user but don't redirect immediately
                 console.log('Firebase session expired');
-                // You can show a toast message here if needed
-                // showToast('Session expired, please login again', 'error');
             }
         });
         
@@ -1658,61 +1680,167 @@ function addProductToReceipt(product) {
             await loadUserReceipts();
             await syncBackupReceiptsToFirebase();
         }
+    } else {
+        console.log('No user session found');
     }
     
-    // Initialize receipt system
+    // Initialize receipt system (only once)
     initializeReceipt();
+    
+    // Setup event listeners (only once)
     setupEventListeners();
-    loadProducts();
+    
+    // Load products
+    await loadProducts();
+    
+    // Update receipt preview
+    updateReceiptPreview();
+    
+    console.log('Application initialization complete');
 });
 
         // ========== NEW FUNCTIONS FOR SAVING RECEIPTS ==========
 
-// Function to prepare receipt data for saving
+// Function to prepare receipt data for saving (with validation)
 function prepareReceiptData() {
-    const now = new Date();
-    const receiptNumber = generateReceiptNumber();
-    const transactionId = generateTransactionId();
-    
-    // Filter valid items
-    const itemsToSave = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
-    
-    if (itemsToSave.length === 0) {
+    try {
+        const now = new Date();
+        const receiptNumber = generateReceiptNumber();
+        const transactionId = generateTransactionId();
+        
+        // Filter valid items
+        const itemsToSave = receiptItems.filter(item => {
+            const isValid = item.name && item.name.trim() !== '' && item.price > 0 && item.quantity > 0;
+            if (!isValid && item.name) {
+                console.warn('Invalid item filtered out:', item);
+            }
+            return isValid;
+        });
+        
+        if (itemsToSave.length === 0) {
+            showToast('Please add at least one valid item with name and price', 'error');
+            return null;
+        }
+        
+        // Validate store information
+        const storeName = document.getElementById('storeName').value.trim();
+        const storePhone = document.getElementById('storePhone').value.trim();
+        
+        if (!storeName) {
+            showToast('Store name is required', 'error');
+            return null;
+        }
+        
+        if (!storePhone) {
+            showToast('Store phone is required', 'error');
+            return null;
+        }
+        
+        // Calculate totals with validation
+        const subtotal = itemsToSave.reduce((sum, item) => {
+            const itemTotal = item.quantity * item.price;
+            if (isNaN(itemTotal) || itemTotal < 0) {
+                console.warn('Invalid item total calculated:', item);
+                return sum;
+            }
+            return sum + itemTotal;
+        }, 0);
+        
+        let deliveryFee = 0;
+        const freeDeliveryChecked = document.getElementById('freeDelivery').checked;
+        const deliveryFeeInput = document.getElementById('deliveryFee');
+        
+        if (!freeDeliveryChecked) {
+            deliveryFee = parseInt(deliveryFeeInput.value) || 0;
+            if (deliveryFee < 0) {
+                showToast('Delivery fee cannot be negative', 'error');
+                return null;
+            }
+        }
+        
+        const total = subtotal + deliveryFee;
+        
+        // Validate customer name
+        const customerName = document.getElementById('customerName').value.trim() || 'Walk-in';
+        if (customerName.length > 50) {
+            showToast('Customer name too long (max 50 characters)', 'error');
+            return null;
+        }
+        
+        // Validate payment method
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        if (!paymentMethod) {
+            showToast('Payment method is required', 'error');
+            return null;
+        }
+        
+        // Prepare receipt object
+        const receiptData = {
+            id: Date.now().toString(), // Unique ID
+            receiptNumber: receiptNumber,
+            transactionId: transactionId,
+            timestamp: now.toISOString(),
+            customerName: customerName,
+            storeName: storeName,
+            storePhone: storePhone,
+            paymentMethod: paymentMethod,
+            freeDelivery: freeDeliveryChecked,
+            deliveryFee: deliveryFee,
+            subtotal: subtotal,
+            totalAmount: total,
+            items: itemsToSave.map(item => ({
+                name: item.name.trim(),
+                quantity: parseInt(item.quantity) || 1,
+                price: parseFloat(item.price) || 0,
+                total: item.total
+            }))
+        };
+        
+        console.log('Receipt data prepared successfully:', receiptData.receiptNumber);
+        return receiptData;
+        
+    } catch (error) {
+        console.error('Error preparing receipt data:', error);
+        showToast('Error preparing receipt. Please check all fields and try again.', 'error');
         return null;
     }
-    
-    const subtotal = itemsToSave.reduce((sum, item) => sum + item.total, 0);
-    let deliveryFee = 0;
-    if (!document.getElementById('freeDelivery').checked) {
-        deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
-    }
-    const total = subtotal + deliveryFee;
-    
-    // Prepare receipt object
-    const receiptData = {
-        id: Date.now().toString(), // Unique ID
-        receiptNumber: receiptNumber,
-        transactionId: transactionId,
-        timestamp: now.toISOString(),
-        customerName: document.getElementById('customerName').value || 'Walk-in',
-        storeName: document.getElementById('storeName').value,
-        storePhone: document.getElementById('storePhone').value,
-        paymentMethod: document.getElementById('paymentMethod').value,
-        freeDelivery: document.getElementById('freeDelivery').checked,
-        deliveryFee: deliveryFee,
-        subtotal: subtotal,
-        totalAmount: total,
-        items: itemsToSave.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.total
-        }))
-    };
-    
-    return receiptData;
 }
 
+// Function to save receipt to localStorage (consolidated function with debug logging)
+function saveReceiptToLocalStorage(receiptData) {
+    // Debug: Check if this receipt was already saved
+    const storedReceipts = localStorage.getItem(STORE_CONFIG.storage.receipts);
+    const receipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    
+    // Check if receipt with same ID already exists
+    const existingIndex = receipts.findIndex(r => r.id === receiptData.id);
+    if (existingIndex !== -1) {
+        console.warn('Receipt already saved, skipping:', receiptData.receiptNumber);
+        return receipts;
+    }
+    
+    console.log('Saving new receipt to localStorage:', receiptData.receiptNumber);
+    
+    // Add new receipt at the beginning (newest first)
+    receipts.unshift(receiptData);
+    
+    // Limit to last 1000 receipts to prevent storage issues
+    if (receipts.length > 1000) {
+        receipts.splice(1000);
+    }
+    
+    // Save back to localStorage
+    localStorage.setItem(STORE_CONFIG.storage.receipts, JSON.stringify(receipts));
+    
+    // Update receipt counter
+    const counter = (parseInt(localStorage.getItem(STORE_CONFIG.storage.receiptCounter)) || 0) + 1;
+    localStorage.setItem(STORE_CONFIG.storage.receiptCounter, counter.toString());
+    
+    console.log('Receipt saved successfully:', receiptData.receiptNumber);
+    
+    // Return updated receipts array
+    return receipts;
+}
 
 // Function to show saved receipt toast
 function showSavedReceiptToast(receiptNumber) {
@@ -1733,9 +1861,19 @@ document.getElementById('freeDelivery').addEventListener('change', function() {
 });
         
         function initializeReceipt() {
-            addEmptyItem();
-            updateReceiptPreview();
-        }
+    console.log('Initializing receipt system...');
+    
+    // Only add empty item if no items exist
+    if (receiptItems.length === 0) {
+        console.log('Adding initial empty item');
+        addEmptyItem();
+    } else {
+        console.log('Items already exist, rendering current items');
+        renderItems();
+    }
+    
+    updateReceiptPreview();
+}
         
         function setupEventListeners() {
             // Printer modal
@@ -2090,49 +2228,47 @@ if (!document.getElementById('freeDelivery').checked) {
     
     console.log('Valid items found:', validItems.length);
     
-    // ========== SAVE RECEIPT ==========
+    // ========== SAVE RECEIPT (with duplicate prevention) ==========
     const receiptData = prepareReceiptData();
     if (receiptData) {
-        // Save to local storage
-        saveReceiptToLocalStorage(receiptData);
+        // Add a unique save flag to prevent duplicate saves
+        const saveKey = `receipt_save_${receiptData.id}`;
+        const alreadySaved = sessionStorage.getItem(saveKey);
         
-        // Save to user account if logged in
-        const user = getCurrentUser();
-        if (user && !user.isGuest) {
-            saveReceiptToUserAccount(receiptData);
+        if (!alreadySaved) {
+            console.log('First time saving this receipt:', receiptData.receiptNumber);
+            
+            // Mark as saved in session storage
+            sessionStorage.setItem(saveKey, 'true');
+            
+            // Save to local storage
+            saveReceiptToLocalStorage(receiptData);
+            
+            // Save to user account if logged in
+            const user = getCurrentUser();
+            if (user && !user.isGuest) {
+                saveReceiptToUserAccount(receiptData);
+            }
+            
+            showSavedReceiptToast(receiptData.receiptNumber);
+            
+            // Clear the save flag after 5 seconds (in case user wants to print same receipt again)
+            setTimeout(() => {
+                sessionStorage.removeItem(saveKey);
+            }, 5000);
+        } else {
+            console.log('Receipt already saved in this session, skipping save');
         }
-        
-        showSavedReceiptToast(receiptData.receiptNumber);
     }
     // ========== END SAVE CODE ==========
     
+    // Print the receipt
     if (selectedPrinterMethod === 'usb-network') {
         printReceiptViaSystem();
     } else if (selectedPrinterMethod === 'web-bluetooth') {
         printReceiptViaBluetooth();
     }
 }
-// Function to save receipt to localStorage
-function saveReceiptToLocalStorage(receiptData) {
-    // Get existing receipts
-    const storedReceipts = localStorage.getItem('willstech_receipts');
-    const receipts = storedReceipts ? JSON.parse(storedReceipts) : [];
-    
-    // Add new receipt at the beginning (newest first)
-    receipts.unshift(receiptData);
-    
-    // Save back to localStorage
-    localStorage.setItem('willstech_receipts', JSON.stringify(receipts));
-    
-    // Update receipt counter
-    const counter = (parseInt(localStorage.getItem('willstech_receipt_counter')) || 0) + 1;
-    localStorage.setItem('willstech_receipt_counter', counter.toString());
-    
-    console.log('Receipt saved to localStorage:', receiptData.receiptNumber);
-    
-    // Return the updated receipts array
-    return receipts;
-        }
 // Save receipt to user account
 async function saveReceiptToUserAccount(receiptData) {
     try {

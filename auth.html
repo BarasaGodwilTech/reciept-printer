@@ -683,6 +683,7 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="auth-container">
@@ -845,15 +846,7 @@
         // =============================================
         // FIREBASE CONFIGURATION
         // =============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
-            authDomain: "willstechstore-reciept.firebaseapp.com",
-            projectId: "willstechstore-reciept",
-            storageBucket: "willstechstore-reciept.firebasestorage.app",
-            messagingSenderId: "218930027222",
-            appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
-            measurementId: "G-0K2H44N77D"
-        };
+        const firebaseConfig = STORE_CONFIG.firebase;
 
                 // Initialize Firebase
         firebase.initializeApp(firebaseConfig);

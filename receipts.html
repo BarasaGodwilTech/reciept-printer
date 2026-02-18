@@ -359,6 +359,7 @@ body.modal-open {
 
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -422,10 +423,10 @@ body.modal-open {
     </div>
     
     <script>
-        // Add these constants at the top
-const RECEIPTS_STORAGE_KEY = 'willstech_receipts';
-const RECEIPT_COUNTER_KEY = 'willstech_receipt_counter';
-const CURRENT_USER_KEY = 'currentUser'; // Consistent key name
+        // Add these constants at top (using config)
+const RECEIPTS_STORAGE_KEY = STORE_CONFIG.storage.receipts;
+const RECEIPT_COUNTER_KEY = STORE_CONFIG.storage.receiptCounter;
+const CURRENT_USER_KEY = STORE_CONFIG.storage.currentUser; // Consistent key name
 
 // Check user session
 function checkUserSession() {
